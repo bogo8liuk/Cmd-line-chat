@@ -3,19 +3,18 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define bad_exit(message, ...)		if (NULL != message) {	\
-										fprintf(stderr, message, __VA_ARGS__);	\
-									}	\
+#define bad_exit(...)				fprintf(stderr, __VA_ARGS__);	\
 									exit(EXIT_FAILURE)
 
 static bool port_conversion(const char *port, uint16_t *res) {
 	uintmax_t value;
 	char *end;
 	errno = 0;
-	value = strtoumax(arg, &end, 10);
+	value = strtoumax(port, &end, 10);
 	if (ERANGE == errno || UINT16_MAX < value)
 		return false;
 	else {
