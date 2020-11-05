@@ -3,5 +3,8 @@ CMakeFiles
 cmake_install.cmake
 Makefile
 
-clchat_request
-clchat_response
+cl_request
+cl_reply
+*.a
+*.o
+*.so
