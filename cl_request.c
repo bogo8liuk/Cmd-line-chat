@@ -22,7 +22,7 @@ static int connect_request(const struct sockaddr *addr, int domain, int type, in
 		close(sockfd);
 	}
 
-	return(-1);
+	return -1;
 }
 
 int main(int argc, char *argv[]) {
@@ -30,22 +30,8 @@ int main(int argc, char *argv[]) {
 		bad_exit("Usage: %s ip_address port_number\n", argv[0]);
 	}
 
-	struct sockaddr_in entry;
 	int sockfd;
-	int domain = AF_INET;
-	int type = SOCK_STREAM;
-	int protocol = 0;
+	struct cl_init_struct *init = cl_init(argv[1], argv[2], AF_INET, SOCK_STREAM, NO_PROTOCOL);
 
-	if (inet_pton(AF_INET, argv[1], &entry.sin_addr) != 1) {
-		bad_exit("Address conversion error\n");
-	}
-
-	if (!port_conversion(argv[2], (uint16_t *) &entry.sin_port)) {
-		bad_exit("Port conversion error\n");
-	}
-
-	entry.sin_family = AF_INET;
-
-	printf("%d\n", (int) entry.sin_port);
-	sockfd = connect_request((struct sockaddr *) &entry, domain, type, protocol);
+	sockfd = connect_request((struct sockaddr *) &init->entry, init->domain, init->type, init->protocol);
 }
