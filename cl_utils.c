@@ -3,6 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <cl_utils.h>
 
 bool port_conversion(const char *port, uint16_t *res) {
 	uintmax_t value;
