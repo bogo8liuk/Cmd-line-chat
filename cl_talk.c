@@ -4,10 +4,31 @@
 #include <cl_utils.h>
 #include <termios.h>
 
+#define USAGE_w "\t'w' to start writing a message; remember that when you are on this mode, incoming messages will not be prompted"
+#define USAGE_e	"\t'e' to disconnect from the chat"
+#define USAGE_h "\t'h' to prompt this help message"
+
 struct socket_lock {
 	int sockfd;
 	pthread_mutex_t *mutex;
 };
+
+static void type_message(int sockfd) {
+	char *str;
+
+	int ret = scanf("> : %s", str);
+	if (EOF == ret) {
+		bad_exit("Error on typing message");
+	}
+
+	if ((ssize_t) ret > send(sockfd, str, strlen(str), 0)) {
+		bad_exit("Error on sending message");
+	}
+}
+
+static void prompt_usage() {
+	printf("==== USAGE ====\nType:\n%s\n%s\n%s\n===============", USAGE_w, USAGE_e, USAGE_h);
+}
 
 static void *send_from_stdin(void *args) {
 	socket_lock *pair = (struct socket_lock *) args;
@@ -25,12 +46,22 @@ static void *send_from_stdin(void *args) {
 
 		switch (c) {
 			case 'w':
+				pthread_mutex_lock(echo_mutex);
+				type_message(sockfd);
+				pthread_mutex_unlock(echo_mutex);
 				break;
 
 			case 'e':
 				break;
 
+			case 'h':
+				pthread_mutex_lock(echo_mutex);
+				prompt_usage();
+				pthread_mutex_unlock(echo_mutex);
+				break;
+
 			case EOF:
+				bad_exit("Error on getting the command");
 				break;
 
 			default:
@@ -48,6 +79,10 @@ void talk(int sockfd) {
 	pthread_t msg_writer, msg_printer;
 	pthread_mutex_t echo_mutex;
 	void *rval;
+
+	if (0 != pthread_mutex_init(&echo_mutex, NULL)) {
+		bad_exit("Error on initiating the mutex to write on stdout");
+	}
 
 	struct socket_lock *pair = {
 		.sockfd = sockfd,
