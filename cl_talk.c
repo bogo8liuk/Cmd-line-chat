@@ -8,6 +8,8 @@
 #define USAGE_e	"\t'e' to disconnect from the chat"
 #define USAGE_h "\t'h' to prompt this help message"
 
+#define INSERT_MODE_MASK	(!ECHO | !ICANON)
+
 struct socket_lock {
 	int sockfd;
 	pthread_mutex_t *mutex;
@@ -36,9 +38,17 @@ static void *send_from_stdin(void *args) {
 	pthread_mutex_t *echo_mutex = pair -> mutex;
 
 	struct termios origin_attrs;
+	struct termios insert_attrs;
 
 	if (0 > tcgetattr(STDIN_FILENO, &origin_attrs)) {
 		bad_exit("Error on getting terminal attributes");
+	}
+
+	memcpy(&insert_attrs, &origin_attrs, sizeof(origin_attrs));
+	insert_attrs.c_lflag |= INSERT_MODE_MASK;
+
+	if (0 > tcsetattr(STDIN_FILENO, TCSANOW, &insert_attrs)) {
+		bad_exit("Error on changing terminal mode");
 	}
 
 	while (1) {
@@ -47,7 +57,9 @@ static void *send_from_stdin(void *args) {
 		switch (c) {
 			case 'w':
 				pthread_mutex_lock(echo_mutex);
+				tcsetattr(STDIN_FILENO, TCSANOW, &origin_attrs);
 				type_message(sockfd);
+				tcsetattr(STDIN_FILENO, TCSANOW, &insert_attrs);
 				pthread_mutex_unlock(echo_mutex);
 				break;
 
@@ -56,7 +68,9 @@ static void *send_from_stdin(void *args) {
 
 			case 'h':
 				pthread_mutex_lock(echo_mutex);
+				tcsetattr(STDIN_FILENO, TCSANOW, &origin_attrs);
 				prompt_usage();
+				tcsetattr(STDIN_FILENO, TCSANOW, &insert_attrs);
 				pthread_mutex_unlock(echo_mutex);
 				break;
 
@@ -74,7 +88,6 @@ static void *receive_to_stdout(void *args) {
 
 }
 
-// TODO: check the return value of the two threads
 void talk(int sockfd) {
 	pthread_t msg_writer, msg_printer;
 	pthread_mutex_t echo_mutex;
