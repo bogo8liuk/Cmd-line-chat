@@ -6,8 +6,8 @@
 
 #define NO_PROTOCOL	0
 
-#define bad_exit(...)				fprintf(stderr, __VA_ARGS__);	\
-									exit(EXIT_FAILURE)
+#define bad_exit(...)	fprintf(stderr, __VA_ARGS__);	\
+						exit(EXIT_FAILURE)
 
 struct cl_init_struct {
 	struct sockaddr_in entry;

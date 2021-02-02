@@ -35,4 +35,6 @@ int main(int argc, char *argv[]) {
 	struct cl_init_struct *init = cl_init(argv[1], argv[2], AF_INET, SOCK_STREAM, NO_PROTOCOL);
 
 	sockfd = accept_request((struct sockaddr *) &init->entry, init->domain, init->type, init->protocol);
+	talk(sockfd);
+	close(sockfd);
 }
