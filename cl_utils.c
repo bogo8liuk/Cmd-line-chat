@@ -169,7 +169,7 @@ struct cl_init_struct *cl_init(char *const address, char *const port, int domain
 	struct cl_init_struct *init = (struct cl_init_struct *) malloc(sizeof(struct cl_init_struct));
 	struct sockaddr_in entry;
 
-	if (inet_pton(domain, address, &entry.sin_addr) != 1) {
+	if (inet_pton(domain, address, &entry.sin_addr.s_addr) != 1) {
 		bad_exit("Address conversion error\n");
 	}
 
