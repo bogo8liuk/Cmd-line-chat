@@ -31,9 +31,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	int sockfd;
-	struct cl_init_struct *init = cl_init(argv[1], argv[2], AF_INET, SOCK_STREAM, NO_PROTOCOL);
+	struct cl_init_struct *init = cl_init(argv[1], argv[2], AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	sockfd = connect_request((struct sockaddr *) &init->entry, init->domain, init->type, init->protocol);
+	sockfd = connect_request((struct sockaddr *) &init -> entry, init -> domain, init -> type, init -> protocol);
+	printf("Connected to %s at port %s\n", argv[1], argv[2]);
 	talk(sockfd);
 	close(sockfd);
 }

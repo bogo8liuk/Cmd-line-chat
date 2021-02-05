@@ -1,6 +1,8 @@
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <cl_talk.h>
 #include <cl_utils.h>
 
 static int accept_request(struct sockaddr *address, int domain, int type, int protocol) {
@@ -18,8 +20,8 @@ static int accept_request(struct sockaddr *address, int domain, int type, int pr
 		bad_exit("Server listening error\n");
 	}
 
-	if ((sockfd = accept(sockfd, address, sizeof(struct sockaddr))) < 0) {
-		bad_exit("Server unable to accept requests error");
+	if ((sockfd = accept(welcomingfd, NULL, NULL)) < 0) {
+		bad_exit("Server unable to accept requests error\n");
 	}
 
 	close(welcomingfd);
@@ -28,11 +30,11 @@ static int accept_request(struct sockaddr *address, int domain, int type, int pr
 
 int main(int argc, char *argv[]) {
 	if (3 != argc) {
-		bad_exit("Usage: %s ip_address port_number", argv[0]);
+		bad_exit("Usage: %s ip_address port_number\n", argv[0]);
 	}
 
 	int sockfd;
-	struct cl_init_struct *init = cl_init(argv[1], argv[2], AF_INET, SOCK_STREAM, NO_PROTOCOL);
+	struct cl_init_struct *init = cl_init(argv[1], argv[2], AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	sockfd = accept_request((struct sockaddr *) &init->entry, init->domain, init->type, init->protocol);
 	talk(sockfd);

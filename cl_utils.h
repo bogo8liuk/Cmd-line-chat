@@ -10,7 +10,7 @@
 						exit(EXIT_FAILURE)
 
 struct cl_init_struct {
-	struct sockaddr_in entry;
+	struct sockaddr_in *entry;
 	int domain;
 	int type;
 	int protocol;

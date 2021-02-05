@@ -1,6 +1,8 @@
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 #include <pthread.h>
+#include <cl_talk.h>
 #include <cl_utils.h>
 #include <termios.h>
 #include <limits.h>
@@ -20,7 +22,7 @@ struct thread_args {
 };
 
 static int type_message(int sockfd) {
-	char *str;
+	char str[MAX_MESSAGE_SIZE];
 
 	int ret = scanf("> : %s", str);
 	if (EOF == ret) {
@@ -39,7 +41,7 @@ static void prompt_usage() {
 }
 
 static void *send_from_stdin(void *args) {
-	thread_args *cur_args = (struct thread_args *) args;
+	struct thread_args *cur_args = (struct thread_args *) args;
 	int sockfd = cur_args -> sockfd;
 	pthread_t printer_thread = cur_args -> tid;
 	pthread_mutex_t *echo_mutex = cur_args -> mutex;
@@ -115,13 +117,13 @@ static void *send_from_stdin(void *args) {
 }
 
 static void *receive_to_stdout(void *args) {
-	thread_args *pair = (struct thread_args *) args;
+	struct thread_args *pair = (struct thread_args *) args;
 	int sockfd = pair -> sockfd;
 	pthread_mutex_t *echo_mutex = pair -> mutex;
 
 	while (1) {
-		char *str;
-		ssize_t ret = recv(sockfd, str, SSIZE_MAX, 0);
+		char str[MAX_MESSAGE_SIZE];
+		ssize_t ret = recv(sockfd, str, MAX_MESSAGE_SIZE, 0);
 
 		if (0 == ret) {
 			continue;
@@ -146,24 +148,24 @@ void talk(int sockfd) {
 		bad_exit("Error on initiating the mutex to write on stdout");
 	}
 
-	struct thread_args *writer_args = {
+	struct thread_args writer_args = {
 		.sockfd = sockfd,
 		.tid = msg_printer,
 		.mutex = &echo_mutex
 	};
 
-	struct thread_args *printer_args = {
+	struct thread_args printer_args = {
 		.sockfd = sockfd,
 		.tid = msg_writer,
 		.mutex = &echo_mutex
 	};
 
-	if (0 != pthread_create(&msg_writer, NULL, send_from_stdin, (void *) writer_args)) {
+	if (0 != pthread_create(&msg_writer, NULL, send_from_stdin, &writer_args)) {
 		close(sockfd);
 		bad_exit("Error on creating the message writer thread");
 	}
 
-	if (0 != pthread_create(&msg_printer, NULL, receive_to_stdout, (void *) printer_args)) {
+	if (0 != pthread_create(&msg_printer, NULL, receive_to_stdout, &printer_args)) {
 		close(sockfd);
 		bad_exit("Error on creating the message printer thread");
 	}

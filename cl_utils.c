@@ -20,10 +20,10 @@ struct cl_init_struct *cl_init(char *const address, char *const port, int domain
 
 	entry.sin_family = AF_INET;
 
-	init->entry = entry;
-	init->domain = domain;
-	init->type = type;
-	init->protocol = protocol;
+	init -> entry = &entry;
+	init -> domain = domain;
+	init -> type = type;
+	init -> protocol = protocol;
 
 	return init;
 }
