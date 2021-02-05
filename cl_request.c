@@ -6,7 +6,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <cl_utils.h>
-#include <cl_talk.h>
 
 static int connect_request(const struct sockaddr *addr, int domain, int type, int protocol) {
 	int sockfd;

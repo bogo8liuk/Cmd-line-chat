@@ -2,7 +2,6 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include <cl_talk.h>
 #include <cl_utils.h>
 
 static int accept_request(struct sockaddr *address, int domain, int type, int protocol) {
