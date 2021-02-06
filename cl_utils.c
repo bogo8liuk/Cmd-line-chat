@@ -125,9 +125,7 @@ static void *send_from_stdin(void *args) {
 
 			case 'h':
 				pthread_mutex_lock(echo_mutex);
-				tcsetattr(STDIN_FILENO, TCSANOW, &origin_attrs);
 				prompt_usage();
-				tcsetattr(STDIN_FILENO, TCSANOW, &insert_attrs);
 				pthread_mutex_unlock(echo_mutex);
 				break;
 
