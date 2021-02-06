@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
 	struct cl_init_struct *init = cl_init(argv[1], argv[2], AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	sockfd = accept_request((struct sockaddr *) init -> entry, init -> domain, init -> type, init -> protocol);
+	printf("Now connected\n\n");
 	talk(sockfd);
 	close(sockfd);
 }

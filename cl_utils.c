@@ -49,9 +49,12 @@ struct thread_args {
 };
 
 static int type_message(int sockfd) {
-	char str[MAX_MESSAGE_SIZE];
+	char str[MAX_MESSAGE_SIZE + 1];
+	str[MAX_MESSAGE_SIZE] = 0;
 
-	int ret = scanf("> : %s", str);
+	printf("> : ");
+	fflush(stdout);
+	int ret = scanf("%[^\n]", str);
 	if (EOF == ret) {
 		return TYPE_ERROR;
 	}
@@ -142,12 +145,12 @@ static void *send_from_stdin(void *args) {
 }
 
 static void *receive_to_stdout(void *args) {
-	struct thread_args *pair = (struct thread_args *) args;
-	int sockfd = pair -> sockfd;
-	pthread_mutex_t *echo_mutex = pair -> mutex;
+	struct thread_args *cur_args = (struct thread_args *) args;
+	int sockfd = cur_args -> sockfd;
+	pthread_mutex_t *echo_mutex = cur_args -> mutex;
 
 	while (1) {
-		char str[MAX_MESSAGE_SIZE];
+		char str[MAX_MESSAGE_SIZE + 1];
 		ssize_t ret = recv(sockfd, str, MAX_MESSAGE_SIZE, 0);
 
 		if (0 == ret) {
@@ -158,7 +161,7 @@ static void *receive_to_stdout(void *args) {
 		}
 
 		pthread_mutex_lock(echo_mutex);
-		printf("END: %s\n", str);
+		printf("\tEND: %s\n", str);
 		pthread_mutex_unlock(echo_mutex);
 	}
 }
@@ -205,7 +208,8 @@ bool port_conversion(char *const port, uint16_t *res) {
 void talk(int sockfd) {
 	pthread_t msg_writer, msg_printer;
 	pthread_mutex_t echo_mutex;
-	void *rval;
+	void *rval_printer;
+	void *rval_writer;
 
 	if (0 != pthread_mutex_init(&echo_mutex, NULL)) {
 		close(sockfd);
@@ -234,12 +238,12 @@ void talk(int sockfd) {
 		bad_exit("Error on creating the message printer thread\n");
 	}
 
-	if (0 != pthread_join(msg_printer, &rval)) {
+	if (0 != pthread_join(msg_printer, &rval_printer)) {
 		close(sockfd);
 		bad_exit("Error on waiting for printer thread\n");
 	}
 
-	if (0 != pthread_join(msg_writer, &rval)) {
+	if (0 != pthread_join(msg_writer, &rval_writer)) {
 		close(sockfd);
 		bad_exit("Error on waiting for writer thread");
 	}
