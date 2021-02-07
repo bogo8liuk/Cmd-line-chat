@@ -44,22 +44,26 @@ SOFTWARE.
 
 struct thread_args {
 	int sockfd;
-	pthread_t tid;
+	pthread_t *tid;
 	pthread_mutex_t *mutex;
 };
 
 static int type_message(int sockfd) {
-	char str[MAX_MESSAGE_SIZE + 1];
-	str[MAX_MESSAGE_SIZE] = 0;
+	char str[MAX_MESSAGE_SIZE + 1] = { 0 };
 
 	printf("> : ");
 	fflush(stdout);
-	int ret = scanf("%[^\n]", str);
-	if (EOF == ret) {
+	if (NULL == fgets(str, MAX_MESSAGE_SIZE, stdin)) {
 		return TYPE_ERROR;
 	}
 
-	if ((ssize_t) ret > send(sockfd, str, strlen(str), 0)) {
+	const size_t length = strlen(str);
+
+	if (0 == length || 1 == length) {
+		return 0;
+	}
+
+	if (length != send(sockfd, str, length, 0)) {
 		return SEND_ERROR;
 	}
 
@@ -73,7 +77,7 @@ static void prompt_usage() {
 static void *send_from_stdin(void *args) {
 	struct thread_args *cur_args = (struct thread_args *) args;
 	int sockfd = cur_args -> sockfd;
-	pthread_t printer_thread = cur_args -> tid;
+	pthread_t printer_thread = *(cur_args -> tid);
 	pthread_mutex_t *echo_mutex = cur_args -> mutex;
 
 	struct termios origin_attrs;
@@ -122,7 +126,7 @@ static void *send_from_stdin(void *args) {
 					bad_exit("Error on terminating thread\n");
 				}
 
-				printf("Closing chat\n");
+				printf("\nClosing chat\n");
 				pthread_exit(NULL);
 				break;
 
@@ -150,7 +154,7 @@ static void *receive_to_stdout(void *args) {
 	pthread_mutex_t *echo_mutex = cur_args -> mutex;
 
 	while (1) {
-		char str[MAX_MESSAGE_SIZE + 1];
+		char str[MAX_MESSAGE_SIZE + 1] = { 0 };
 		ssize_t ret = recv(sockfd, str, MAX_MESSAGE_SIZE, 0);
 
 		if (0 == ret) {
@@ -161,7 +165,7 @@ static void *receive_to_stdout(void *args) {
 		}
 
 		pthread_mutex_lock(echo_mutex);
-		printf("\tEND: %s\n", str);
+		printf("\tEND: %s", str);
 		pthread_mutex_unlock(echo_mutex);
 	}
 }
@@ -218,13 +222,13 @@ void talk(int sockfd) {
 
 	struct thread_args writer_args = {
 		.sockfd = sockfd,
-		.tid = msg_printer,
+		.tid = &msg_printer,
 		.mutex = &echo_mutex
 	};
 
 	struct thread_args printer_args = {
 		.sockfd = sockfd,
-		.tid = msg_writer,
+		.tid = &msg_writer,
 		.mutex = &echo_mutex
 	};
 
