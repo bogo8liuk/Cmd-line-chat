@@ -57,13 +57,17 @@ static int type_message(int sockfd) {
 		return TYPE_ERROR;
 	}
 
+	char msg[MAX_MESSAGE_SIZE + 7] = "\tEND: ";
 	const size_t length = strlen(str);
 
 	if (0 == length || 1 == length) {
 		return 0;
 	}
 
-	if ((ssize_t) length != send(sockfd, str, length, 0)) {
+	strncat(msg, str, length);
+	const size_t msg_length = strlen(msg);
+
+	if ((ssize_t) msg_length != send(sockfd, msg, msg_length, 0)) {
 		return SEND_ERROR;
 	}
 
@@ -165,7 +169,7 @@ static void *receive_to_stdout(void *args) {
 		}
 
 		pthread_mutex_lock(echo_mutex);
-		printf("\tEND: %s", str);
+		printf("%s", str);
 		pthread_mutex_unlock(echo_mutex);
 	}
 }
