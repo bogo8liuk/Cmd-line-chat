@@ -63,7 +63,7 @@ static int type_message(int sockfd) {
 		return 0;
 	}
 
-	if (length != send(sockfd, str, length, 0)) {
+	if ((ssize_t) length != send(sockfd, str, length, 0)) {
 		return SEND_ERROR;
 	}
 
