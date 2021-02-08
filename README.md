@@ -30,6 +30,6 @@ This project has been developed with C11. The CMake required version is the 3.16
 ### Build
 To build the project, simply run the following commands:
 ```bash
-$ cmake .
+$ cmake ./
 $ make
 ```
