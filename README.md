@@ -1,7 +1,7 @@
 # Cmd-line-chat
 ### How it works
 Cmd-line-chat is a simple project that allows two terminals to communicate
-via a TCP channel. It is thought for more than two terminals. It has two
+via a TCP channel. It is not thought for more than two terminals. It has two
 executable files: `cl_reply` and `cl_request`. The first one has to be executed
 passing it the ip address and the port number that represent the point to
 connect to:
