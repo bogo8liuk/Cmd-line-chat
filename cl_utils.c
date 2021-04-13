@@ -188,7 +188,7 @@ struct cl_init_struct *cl_init(char *const address, char *const port, int domain
 
 	entry -> sin_family = domain;
 
-#ifdef __gnu_linux__
+#ifdef (__gnu_linux__)
 	memset(entry -> sin_zero, 0, sizeof(entry -> sin_zero));
 #endif
 

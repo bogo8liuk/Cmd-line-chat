@@ -31,8 +31,10 @@ SOFTWARE.
 
 #define MAX_MESSAGE_SIZE	4096
 
-#define bad_exit(...)	fprintf(stderr, __VA_ARGS__);	\
-						exit(EXIT_FAILURE)
+#define bad_exit(...)	do {    \
+                            fprintf(stderr, __VA_ARGS__);	\
+						    exit(EXIT_FAILURE); \
+                        while (0)
 
 struct cl_init_struct {
 	struct sockaddr_in *entry;
